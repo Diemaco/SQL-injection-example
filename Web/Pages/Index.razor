@@ -1,0 +1,73 @@
+﻿@page "/"
+@using Web.Data
+@inject ProductService ProductService
+
+<PageTitle>Products</PageTitle>
+
+<h1>Products</h1>
+
+@if (_products == null)
+{
+    <p>
+        <em>Loading...</em>
+    </p>
+
+    return;
+}
+
+@* Search bar *@
+<div class="row mb-3">
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Product name.." @bind="_searchTerm">
+
+            <button class="btn btn-outline-secondary" type="button" @onclick="SearchTerm">Search</button>
+        </div>
+    </div>
+</div>
+
+@* Table *@
+<div class="row">
+    <div class="col-12 col-md-8 col-lg-6">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>Name</th>
+                <th>Price</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var product in _products)
+            {
+                <tr>
+                    <td>@product.Name</td>
+                    <td>@product.Price</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@code {
+    private Product[]? _products;
+
+    private string? _searchTerm;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _products ??= await ProductService.GetProducts();
+    }
+
+    private async Task SearchTerm()
+    {
+        if (string.IsNullOrWhiteSpace(_searchTerm))
+        {
+            _products = await ProductService.GetProducts();
+            return;
+        }
+
+        _products = await ProductService.SearchProducts(_searchTerm);
+    }
+
+}
